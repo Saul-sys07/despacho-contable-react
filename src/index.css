@@ -1,0 +1,132 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:       #1D3A5F;
+  --navy-light: #2A5085;
+  --navy-dim:   #EBF2FA;
+  --accent:     #1D9E75;
+  --accent-dim: #EAF3DE;
+  --amber:      #D97706;
+  --amber-dim:  #FAEEDA;
+  --red:        #DC2626;
+  --red-dim:    #FEE2E2;
+  --gray-50:    #F8F9FA;
+  --gray-100:   #F1F3F5;
+  --gray-200:   #E9ECEF;
+  --gray-300:   #DEE2E6;
+  --gray-400:   #ADB5BD;
+  --gray-500:   #6C757D;
+  --gray-700:   #495057;
+  --gray-900:   #212529;
+  --bg:         #F4F6F9;
+  --surface:    #FFFFFF;
+  --border:     #E2E8F0;
+  --text:       #1A202C;
+  --text-muted: #718096;
+  --font:       'DM Sans', sans-serif;
+  --mono:       'DM Mono', monospace;
+  --radius:     8px;
+  --radius-lg:  12px;
+  --shadow:     0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 10px; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 12px;
+  white-space: nowrap;
+}
+.badge-green  { background: var(--accent-dim); color: #15803D; }
+.badge-amber  { background: var(--amber-dim);  color: #92400E; }
+.badge-red    { background: var(--red-dim);    color: #991B1B; }
+.badge-blue   { background: var(--navy-dim);   color: var(--navy); }
+.badge-gray   { background: var(--gray-100);   color: var(--gray-500); }
+
+/* ── Botones ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  padding: 7px 14px; border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn:hover { background: var(--gray-50); }
+.btn-primary { background: var(--navy); color: white; border-color: var(--navy); }
+.btn-primary:hover { background: var(--navy-light); }
+.btn-accent  { background: var(--accent); color: white; border-color: var(--accent); }
+.btn-sm { font-size: 12px; padding: 5px 10px; }
+
+/* ── Inputs ── */
+.input {
+  width: 100%; padding: 8px 12px;
+  font-family: var(--font); font-size: 13px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text);
+  outline: none; transition: border-color 0.15s;
+}
+.input:focus { border-color: var(--navy); }
+.input::placeholder { color: var(--text-muted); }
+
+select.input { cursor: pointer; }
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+/* ── Tabla ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; font-size: 11px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.05em; padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--gray-50);
+}
+td {
+  padding: 10px 14px; font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--gray-50); }
+
+/* ── Loading ── */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--navy);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-center {
+  display: flex; align-items: center; justify-content: center;
+  height: 200px; gap: 10px; color: var(--text-muted);
+}
+
+/* ── Mono ── */
+.mono { font-family: var(--mono); font-size: 12px; }
