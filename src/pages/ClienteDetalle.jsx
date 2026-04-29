@@ -353,29 +353,39 @@ export default function ClienteDetalle() {
                     </div>
                     <table>
                       <thead>
-                        <tr>
-                          <th>RFC / Nombre</th>
-                          <th style={{textAlign:'right'}}>Facturas</th>
-                          <th style={{textAlign:'right'}}>Base</th>
-                        </tr>
-                      </thead>
+  <tr>
+    <th>RFC / Nombre</th>
+    <th style={{textAlign:'right'}}>Facturas</th>
+    <th style={{textAlign:'right'}}>Tasa IVA</th>
+    <th style={{textAlign:'right'}}>Base</th>
+    <th style={{textAlign:'right'}}>IVA</th>
+  </tr>
+</thead>
                       <tbody>
-                        {desglose.ingresos.map((r, i) => (
-                          <tr key={i}>
-                            <td>
-                              <div style={{fontFamily:'var(--mono)', fontSize:11}}>{r.rfc}</div>
-                              <div style={{fontSize:11, color:'var(--text-muted)'}}>{r.nombre || '—'}</div>
-                            </td>
-                            <td style={{textAlign:'right', fontSize:12}}>{r.num_facturas}</td>
-                            <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
-                              ${parseFloat(r.base).toLocaleString('es-MX', {minimumFractionDigits:2})}
-                            </td>
-                          </tr>
-                        ))}
-                        {!desglose.ingresos.length && (
-                          <tr><td colSpan={3} style={{textAlign:'center', color:'var(--text-muted)', fontSize:12}}>Sin ingresos</td></tr>
-                        )}
-                      </tbody>
+  {desglose.ingresos.map((r, i) => (
+    <tr key={i}>
+      <td>
+        <div style={{fontFamily:'var(--mono)', fontSize:11}}>{r.rfc}</div>
+        <div style={{fontSize:11, color:'var(--text-muted)'}}>{r.nombre || '—'}</div>
+      </td>
+      <td style={{textAlign:'right', fontSize:12}}>{r.num_facturas}</td>
+      <td style={{textAlign:'right'}}>
+        <span className={`badge badge-${r.tasa_iva==16?'blue':r.tasa_iva==8?'amber':'gray'}`}>
+          {r.tasa_iva}%
+        </span>
+      </td>
+      <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+        ${parseFloat(r.base).toLocaleString('es-MX', {minimumFractionDigits:2})}
+      </td>
+      <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+        ${parseFloat(r.iva).toLocaleString('es-MX', {minimumFractionDigits:2})}
+      </td>
+    </tr>
+  ))}
+  {!desglose.ingresos.length && (
+    <tr><td colSpan={5} style={{textAlign:'center', color:'var(--text-muted)', fontSize:12}}>Sin ingresos</td></tr>
+  )}
+</tbody>
                     </table>
                   </div>
 
@@ -386,29 +396,39 @@ export default function ClienteDetalle() {
                     </div>
                     <table>
                       <thead>
-                        <tr>
-                          <th>RFC / Nombre</th>
-                          <th style={{textAlign:'right'}}>Facturas</th>
-                          <th style={{textAlign:'right'}}>Base</th>
-                        </tr>
-                      </thead>
+  <tr>
+    <th>RFC / Nombre</th>
+    <th style={{textAlign:'right'}}>Facturas</th>
+    <th style={{textAlign:'right'}}>Tasa IVA</th>
+    <th style={{textAlign:'right'}}>Base</th>
+    <th style={{textAlign:'right'}}>IVA</th>
+  </tr>
+</thead>
                       <tbody>
-                        {desglose.egresos.map((r, i) => (
-                          <tr key={i}>
-                            <td>
-                              <div style={{fontFamily:'var(--mono)', fontSize:11}}>{r.rfc}</div>
-                              <div style={{fontSize:11, color:'var(--text-muted)'}}>{r.nombre || '—'}</div>
-                            </td>
-                            <td style={{textAlign:'right', fontSize:12}}>{r.num_facturas}</td>
-                            <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
-                              ${parseFloat(r.base).toLocaleString('es-MX', {minimumFractionDigits:2})}
-                            </td>
-                          </tr>
-                        ))}
-                        {!desglose.egresos.length && (
-                          <tr><td colSpan={3} style={{textAlign:'center', color:'var(--text-muted)', fontSize:12}}>Sin egresos</td></tr>
-                        )}
-                      </tbody>
+  {desglose.egresos.map((r, i) => (
+    <tr key={i}>
+      <td>
+        <div style={{fontFamily:'var(--mono)', fontSize:11}}>{r.rfc}</div>
+        <div style={{fontSize:11, color:'var(--text-muted)'}}>{r.nombre || '—'}</div>
+      </td>
+      <td style={{textAlign:'right', fontSize:12}}>{r.num_facturas}</td>
+      <td style={{textAlign:'right'}}>
+        <span className={`badge badge-${r.tasa_iva==16?'blue':r.tasa_iva==8?'amber':'gray'}`}>
+          {r.tasa_iva}%
+        </span>
+      </td>
+      <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+        ${parseFloat(r.base).toLocaleString('es-MX', {minimumFractionDigits:2})}
+      </td>
+      <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+        ${parseFloat(r.iva).toLocaleString('es-MX', {minimumFractionDigits:2})}
+      </td>
+    </tr>
+  ))}
+  {!desglose.egresos.length && (
+    <tr><td colSpan={5} style={{textAlign:'center', color:'var(--text-muted)', fontSize:12}}>Sin egresos</td></tr>
+  )}
+</tbody>
                     </table>
                   </div>
                 </div>
