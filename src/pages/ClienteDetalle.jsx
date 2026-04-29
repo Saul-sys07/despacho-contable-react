@@ -144,7 +144,12 @@ export default function ClienteDetalle() {
         fd2.append('clasificacion', 'egreso')
         for (const f of xmlsEgr) fd2.append('xmls', f)
         const { data } = await api.post('/cfdi/procesar', fd2, { headers: { 'Content-Type': 'multipart/form-data' } })
-        alert(`Egresos: ${data.procesados} procesados, ${data.duplicados} duplicados`)
+        let msg = `Egresos: ${data.procesados} procesados, ${data.duplicados} duplicados`
+        if (data.errores?.length > 0) {
+        msg += `\n❌ Errores (${data.errores.length}):\n`
+        msg += data.errores.map(e => `${e.archivo}: ${e.error}`).join('\n')
+        }
+        alert(msg)
       }
       setModalCfdi(false)
       setXmlsIng([])
