@@ -28,7 +28,7 @@ export default function Dashboard() {
   const hoy = new Date()
 
   useEffect(() => {
-    api.get('/dashboard/')
+    api.get('/dashboard')
       .then(r => setData(r.data))
       .finally(() => setLoading(false))
   }, [])
