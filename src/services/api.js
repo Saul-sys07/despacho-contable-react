@@ -1,17 +1,17 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseURL: 'https://web-production-17c5b.up.railway.app',
 })
 
-// Agregar token en cada request
-api.interceptors.request.use(config => {
+api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
   return config
 })
 
-// Si el token expira, redirigir al login
 api.interceptors.response.use(
   res => res,
   err => {
