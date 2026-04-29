@@ -104,9 +104,20 @@ export default function Clientes() {
                     : <span className="badge badge-gray">Inactivo</span>}
                 </td>
                 <td>
-                  <button className="btn btn-sm" onClick={e => { e.stopPropagation(); navigate(`/clientes/${c.id}`) }}>
-                    Ver →
-                  </button>
+                  <div style={{display:'flex', gap:6}}>
+                    <button className="btn btn-sm" onClick={e => { e.stopPropagation(); navigate(`/clientes/${c.id}`) }}>
+                      Ver →
+                    </button>
+                    <button className="btn btn-sm" style={{color:'var(--red)', borderColor:'var(--red)'}}
+                      onClick={async e => {
+                        e.stopPropagation()
+                        if (!confirm(`¿Borrar a ${c.nombre_completo}?`)) return
+                        await api.delete(`/clientes/${c.id}`)
+                        cargar()
+                      }}>
+                      🗑
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
