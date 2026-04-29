@@ -25,6 +25,7 @@ export default function ClienteDetalle() {
   const [tab,        setTab]        = useState('archivero') // archivero | cfdi | tareas
   const [documentos, setDocumentos] = useState([])
   const [cfdis,      setCfdis]      = useState(null)
+  const [desglose,   setDesglose]   = useState(null)
   const [modalDoc,   setModalDoc]   = useState(false)
   const [modalEnt,   setModalEnt]   = useState(false)
   const [modalCfdi,  setModalCfdi]  = useState(false)
@@ -64,8 +65,12 @@ export default function ClienteDetalle() {
     const params = new URLSearchParams()
     if (filtroPeriodo.anio) params.append('anio', filtroPeriodo.anio)
     if (filtroPeriodo.mes)  params.append('mes',  filtroPeriodo.mes)
-    const { data } = await api.get(`/cfdi/resumen/${entidad_id}?${params}`)
-    setCfdis(data)
+    const [resumen, desglose] = await Promise.all([
+      api.get(`/cfdi/resumen/${entidad_id}?${params}`),
+      api.get(`/cfdi/desglose/${entidad_id}?${params}`),
+    ])
+    setCfdis(resumen.data)
+    setDesglose(desglose.data)
   }
 
   function cambiarEntidad(idx) {
@@ -306,8 +311,8 @@ export default function ClienteDetalle() {
 
           {/* CFDIs / UTILIDAD */}
           {tab === 'cfdi' && (
-            <div>
-              <div style={{display:'flex', justifyContent:'flex-end', marginBottom:12}}>
+            <div style={{display:'flex', flexDirection:'column', gap:16}}>
+              <div style={{display:'flex', justifyContent:'flex-end'}}>
                 <button className="btn btn-primary" onClick={() => setModalCfdi(true)}>
                   + Cargar XMLs del SAT
                 </button>
@@ -334,6 +339,77 @@ export default function ClienteDetalle() {
                       {cfdis.utilidad_base >= 0 ? '+' : ''}${cfdis.utilidad_base.toLocaleString('es-MX', {minimumFractionDigits:2})}
                     </div>
                     <div className="cfdi-sub">Base para cálculo ISR</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Desglose por RFC */}
+              {desglose && (
+                <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:14}}>
+                  {/* Ingresos por cliente */}
+                  <div className="card">
+                    <div style={{padding:'10px 16px', borderBottom:'1px solid var(--border)', fontWeight:600, fontSize:13, color:'#15803D'}}>
+                      📥 Ingresos por cliente
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>RFC / Nombre</th>
+                          <th style={{textAlign:'right'}}>Facturas</th>
+                          <th style={{textAlign:'right'}}>Base</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {desglose.ingresos.map((r, i) => (
+                          <tr key={i}>
+                            <td>
+                              <div style={{fontFamily:'var(--mono)', fontSize:11}}>{r.rfc}</div>
+                              <div style={{fontSize:11, color:'var(--text-muted)'}}>{r.nombre || '—'}</div>
+                            </td>
+                            <td style={{textAlign:'right', fontSize:12}}>{r.num_facturas}</td>
+                            <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+                              ${parseFloat(r.base).toLocaleString('es-MX', {minimumFractionDigits:2})}
+                            </td>
+                          </tr>
+                        ))}
+                        {!desglose.ingresos.length && (
+                          <tr><td colSpan={3} style={{textAlign:'center', color:'var(--text-muted)', fontSize:12}}>Sin ingresos</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Egresos por proveedor */}
+                  <div className="card">
+                    <div style={{padding:'10px 16px', borderBottom:'1px solid var(--border)', fontWeight:600, fontSize:13, color:'var(--red)'}}>
+                      📤 Egresos por proveedor
+                    </div>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>RFC / Nombre</th>
+                          <th style={{textAlign:'right'}}>Facturas</th>
+                          <th style={{textAlign:'right'}}>Base</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {desglose.egresos.map((r, i) => (
+                          <tr key={i}>
+                            <td>
+                              <div style={{fontFamily:'var(--mono)', fontSize:11}}>{r.rfc}</div>
+                              <div style={{fontSize:11, color:'var(--text-muted)'}}>{r.nombre || '—'}</div>
+                            </td>
+                            <td style={{textAlign:'right', fontSize:12}}>{r.num_facturas}</td>
+                            <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+                              ${parseFloat(r.base).toLocaleString('es-MX', {minimumFractionDigits:2})}
+                            </td>
+                          </tr>
+                        ))}
+                        {!desglose.egresos.length && (
+                          <tr><td colSpan={3} style={{textAlign:'center', color:'var(--text-muted)', fontSize:12}}>Sin egresos</td></tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
