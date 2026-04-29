@@ -17,7 +17,7 @@ export default function Clientes() {
   async function cargar() {
     setLoading(true)
     try {
-      const { data } = await api.get('/clientes/')
+      const { data } = await api.get('/clientes')
       setClientes(data)
     } finally {
       setLoading(false)
@@ -28,7 +28,7 @@ export default function Clientes() {
     e.preventDefault()
     setGuardando(true)
     try {
-      await api.post('/clientes/', form)
+      await api.post('/clientes', form)
       setModal(false)
       setForm({ nombre_completo:'', telefono:'', email:'', notas:'' })
       cargar()
