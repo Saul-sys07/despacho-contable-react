@@ -7,6 +7,7 @@ import ClienteDetalle from './pages/ClienteDetalle'
 import Tareas      from './pages/Tareas'
 import Agenda      from './pages/Agenda'
 import Facturas    from './pages/Facturas'
+import ResumenCierre from './pages/ResumenCierre'
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token')
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="facturas" element={<Facturas />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="cierre" element={<ResumenCierre />} />
       </Routes>
     </BrowserRouter>
   )

@@ -7,6 +7,7 @@ const NAV = [
   { to: '/tareas',   label: 'Tareas',      icon: '✓' },
   { to: '/agenda',   label: 'Agenda',      icon: '▦' },
   { to: '/facturas', label: 'Facturación', icon: '$' },
+  { to: '/cierre', label: 'Cierre mensual', icon: '📊' },
 ]
 
 export default function Layout() {
