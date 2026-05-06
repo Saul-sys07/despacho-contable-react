@@ -201,7 +201,7 @@ export default function ClienteDetalle() {
                       r.nivel_revision==='revisar_isr'     ? '0% ISR'     :
                       r.nivel_revision==='revisar_mixta'   ? '⚠️ Mixta'   :
                       r.nivel_revision==='nomina'          ? 'Nómina'     :
-                      r.nivel_revision==='nota_credito'    ? 'Nota Cred.' : '?'
+                      r.nivel_revision==='nota_credito'    ? 'Nota Cred.' : '-'
                       }
                     </span>
                   </td>
