@@ -163,70 +163,73 @@ export default function ClienteDetalle() {
   }
 
   function TablaDesglose({ titulo, color, filas }) {
-    return (
-      <div className="card">
-        <div style={{padding:'10px 16px', borderBottom:'1px solid var(--border)', fontWeight:600, fontSize:13, color}}>
-          {titulo}
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>RFC / Nombre</th>
-              <th style={{textAlign:'right'}}>Fact.</th>
-              <th style={{textAlign:'right'}}>IVA</th>
-              <th style={{textAlign:'right'}}>Base</th>
-              <th style={{textAlign:'right'}}>IVA $</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filas.map((r, i) => {
-              const tasa = Number(r.tasa_iva)
-              return (
-                <tr key={i}>
-                  <td>
-                    <div style={{fontFamily:'var(--mono)', fontSize:11}}>{r.rfc}</div>
-                    <div style={{fontSize:11, color:'var(--text-muted)'}}>{r.nombre || '—'}</div>
-                  </td>
-                  <td style={{textAlign:'right'}}>
-                    <span className={`badge badge-${
-                      r.nivel_revision==='valida'          ? 'blue'  :
-                      r.nivel_revision==='valida_frontera' ? 'amber' :
-                      r.nivel_revision==='revisar_isr'     ? 'gray'  :
-                      r.nivel_revision==='revisar_mixta'   ? 'amber' :
-                      r.nivel_revision==='nomina'          ? 'gray'  :
-                      r.nivel_revision==='nota_credito'    ? 'red'   : 'gray'
-                    }`}>
-                      {r.nivel_revision==='valida'          ? '16% ✓'      :
-                      r.nivel_revision==='valida_frontera' ? '8% ✓'       :
-                      r.nivel_revision==='revisar_isr'     ? '0% ISR'     :
-                      r.nivel_revision==='revisar_mixta'   ? '⚠️ Mixta'   :
-                      r.nivel_revision==='nomina'          ? 'Nómina'     :
-                      r.nivel_revision==='nota_credito'    ? 'Nota Cred.' : '-'
-                      }
-                    </span>
-                  </td>
-                  <td style={{textAlign:'right'}}>
-                    <span className={`badge badge-${tasa===16?'blue':tasa===8?'amber':'gray'}`}>
-                      {tasa}%
-                    </span>
-                  </td>
-                  <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
-                    ${parseFloat(r.base).toLocaleString('es-MX', {minimumFractionDigits:2})}
-                  </td>
-                  <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
-                    ${parseFloat(r.iva).toLocaleString('es-MX', {minimumFractionDigits:2})}
-                  </td>
-                </tr>
-              )
-            })}
-            {!filas.length && (
-              <tr><td colSpan={5} style={{textAlign:'center', color:'var(--text-muted)', fontSize:12, padding:12}}>Sin registros</td></tr>
-            )}
-          </tbody>
-        </table>
+  return (
+    <div className="card">
+      <div style={{padding:'10px 16px', borderBottom:'1px solid var(--border)', fontWeight:600, fontSize:13, color}}>
+        {titulo}
       </div>
-    )
-  }
+      <table>
+        <thead>
+          <tr>
+            <th>RFC / Nombre</th>
+            <th style={{textAlign:'right'}}>Fact.</th>
+            <th style={{textAlign:'right'}}>IVA</th>
+            <th style={{textAlign:'right'}}>Base</th>
+            <th style={{textAlign:'right'}}>IVA $</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filas.map((r, i) => {
+            const nivel = r.nivel_revision || 'revisar_isr'
+            const badgeColor =
+              nivel === 'valida'          ? 'blue'  :
+              nivel === 'valida_frontera' ? 'amber' :
+              nivel === 'revisar_isr'     ? 'gray'  :
+              nivel === 'revisar_mixta'   ? 'amber' :
+              nivel === 'nomina'          ? 'gray'  :
+              nivel === 'nota_credito'    ? 'red'   : 'gray'
+
+            const badgeText =
+              nivel === 'valida'          ? '16% ✓'      :
+              nivel === 'valida_frontera' ? '8% ✓'       :
+              nivel === 'revisar_isr'     ? '0% ISR'     :
+              nivel === 'revisar_mixta'   ? '⚠️ Mixta'   :
+              nivel === 'nomina'          ? 'Nómina'     :
+              nivel === 'nota_credito'    ? 'Nota Cred.' : '—'
+
+            return (
+              <tr key={i}>
+                <td>
+                  <div style={{fontFamily:'var(--mono)', fontSize:11}}>{r.rfc}</div>
+                  <div style={{fontSize:11, color:'var(--text-muted)'}}>{r.nombre || '—'}</div>
+                </td>
+                <td style={{textAlign:'right', fontSize:12}}>{r.num_facturas}</td>
+                <td style={{textAlign:'right'}}>
+                  <span className={`badge badge-${badgeColor}`}>
+                    {badgeText}
+                  </span>
+                </td>
+                <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+                  ${parseFloat(r.base || 0).toLocaleString('es-MX', {minimumFractionDigits:2})}
+                </td>
+                <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+                  ${parseFloat(r.iva || 0).toLocaleString('es-MX', {minimumFractionDigits:2})}
+                </td>
+              </tr>
+            )
+          })}
+          {!filas.length && (
+            <tr>
+              <td colSpan={5} style={{textAlign:'center', color:'var(--text-muted)', fontSize:12, padding:12}}>
+                Sin registros
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}
 
   if (loading) return <div className="loading-center"><div className="spinner"/> Cargando...</div>
   if (!cliente) return <div style={{padding:24}}>Cliente no encontrado</div>
