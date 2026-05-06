@@ -187,7 +187,24 @@ export default function ClienteDetalle() {
                     <div style={{fontFamily:'var(--mono)', fontSize:11}}>{r.rfc}</div>
                     <div style={{fontSize:11, color:'var(--text-muted)'}}>{r.nombre || '—'}</div>
                   </td>
-                  <td style={{textAlign:'right', fontSize:12}}>{r.num_facturas}</td>
+                  <td style={{textAlign:'right'}}>
+                    <span className={`badge badge-${
+                      r.nivel_revision==='valida'          ? 'blue'  :
+                      r.nivel_revision==='valida_frontera' ? 'amber' :
+                      r.nivel_revision==='revisar_isr'     ? 'gray'  :
+                      r.nivel_revision==='revisar_mixta'   ? 'amber' :
+                      r.nivel_revision==='nomina'          ? 'gray'  :
+                      r.nivel_revision==='nota_credito'    ? 'red'   : 'gray'
+                    }`}>
+                      {r.nivel_revision==='valida'          ? '16% ✓'      :
+                      r.nivel_revision==='valida_frontera' ? '8% ✓'       :
+                      r.nivel_revision==='revisar_isr'     ? '0% ISR'     :
+                      r.nivel_revision==='revisar_mixta'   ? '⚠️ Mixta'   :
+                      r.nivel_revision==='nomina'          ? 'Nómina'     :
+                      r.nivel_revision==='nota_credito'    ? 'Nota Cred.' : '?'
+                      }
+                    </span>
+                  </td>
                   <td style={{textAlign:'right'}}>
                     <span className={`badge badge-${tasa===16?'blue':tasa===8?'amber':'gray'}`}>
                       {tasa}%
