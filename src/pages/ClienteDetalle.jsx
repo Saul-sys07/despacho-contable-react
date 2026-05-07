@@ -231,6 +231,7 @@ export default function ClienteDetalle() {
   )
 }
 
+
   if (loading) return <div className="loading-center"><div className="spinner"/> Cargando...</div>
   if (!cliente) return <div style={{padding:24}}>Cliente no encontrado</div>
 
