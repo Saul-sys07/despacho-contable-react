@@ -180,8 +180,7 @@ export default function ClienteDetalle() {
         </thead>
         <tbody>
           {filas.map((r, i) => {
-  console.log('fila:', r)  // ← agrega esta línea
-  const nivel = r.nivel_revision || 'revisar_isr'
+            const nivel = r.nivel_revision || 'revisar_isr'
             const badgeColor =
               nivel === 'valida'          ? 'blue'  :
               nivel === 'valida_frontera' ? 'amber' :
