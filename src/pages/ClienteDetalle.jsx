@@ -722,7 +722,13 @@ export default function ClienteDetalle() {
           </div>
         </div>
       )}
-
+      {modalRevision && entidad && (
+  <ModalRevision
+    entidad_id={entidad.id}
+    onClose={() => setModalRevision(false)}
+    onGuardado={() => cargarCfdis(entidad.id)}
+  />
+)}
     </div>
   )
 }
