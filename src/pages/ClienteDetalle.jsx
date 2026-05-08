@@ -5,40 +5,42 @@ import './ClienteDetalle.css'
 
 const TIPOS_DOC = [
   { value: 'opinion_cumplimiento', label: 'Opinión de cumplimiento' },
-  { value: 'declaracion_isr', label: 'Declaración ISR' },
-  { value: 'declaracion_iva', label: 'Declaración IVA' },
-  { value: 'suas', label: 'SUAS' },
-  { value: 'contrato', label: 'Contrato / Poder' },
-  { value: 'acuse', label: 'Acuse' },
-  { value: 'otro', label: 'Otro' },
+  { value: 'declaracion_isr',      label: 'Declaración ISR' },
+  { value: 'declaracion_iva',      label: 'Declaración IVA' },
+  { value: 'suas',                 label: 'SUAS' },
+  { value: 'contrato',             label: 'Contrato / Poder' },
+  { value: 'acuse',                label: 'Acuse' },
+  { value: 'otro',                 label: 'Otro' },
 ]
 
-const MESES = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+const MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
+               'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
 export default function ClienteDetalle() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [cliente, setCliente] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [tabEntidad, setTabEntidad] = useState(0)
-  const [tab, setTab] = useState('archivero')
-  const [documentos, setDocumentos] = useState([])
-  const [cfdis, setCfdis] = useState(null)
-  const [desglose, setDesglose] = useState(null)
-  const [resumenIva, setResumenIva] = useState(null)
-  const [resumenIsr, setResumenIsr] = useState(null)
-  const [modalDoc, setModalDoc] = useState(false)
-  const [modalEnt, setModalEnt] = useState(false)
-  const [modalCfdi, setModalCfdi] = useState(false)
-  const [formDoc, setFormDoc] = useState({ tipo_doc: 'opinion_cumplimiento', mes: '', anio: new Date().getFullYear(), notas: '' })
-  const [formEnt, setFormEnt] = useState({ tipo: 'fisica', razon_social: '', rfc: '', regimen_fiscal: '' })
-  const [archivos, setArchivos] = useState([])
-  const [xmlsIng, setXmlsIng] = useState([])
-  const [xmlsEgr, setXmlsEgr] = useState([])
-  const [guardando, setGuardando] = useState(false)
-  const [filtroPeriodo, setFiltroPeriodo] = useState({ anio: new Date().getFullYear(), mes: '' })
+  const [cliente,       setCliente]       = useState(null)
+  const [loading,       setLoading]       = useState(true)
+  const [tabEntidad,    setTabEntidad]    = useState(0)
+  const [tab,           setTab]           = useState('archivero')
+  const [documentos,    setDocumentos]    = useState([])
+  const [cfdis,         setCfdis]         = useState(null)
+  const [desglose,      setDesglose]      = useState(null)
+  const [resumenIva,    setResumenIva]    = useState(null)
+  const [resumenIsr,    setResumenIsr]    = useState(null)
+  const [desgloseIva,   setDesgloseIva]   = useState(null)
+  const [desgloseIsr,   setDesgloseIsr]   = useState(null)
+  const [modalDoc,      setModalDoc]      = useState(false)
+  const [modalEnt,      setModalEnt]      = useState(false)
+  const [modalCfdi,     setModalCfdi]     = useState(false)
   const [modalRevision, setModalRevision] = useState(false)
+  const [formDoc,       setFormDoc]       = useState({ tipo_doc:'opinion_cumplimiento', mes:'', anio: new Date().getFullYear(), notas:'' })
+  const [formEnt,       setFormEnt]       = useState({ tipo:'fisica', razon_social:'', rfc:'', regimen_fiscal:'' })
+  const [archivos,      setArchivos]      = useState([])
+  const [xmlsIng,       setXmlsIng]       = useState([])
+  const [xmlsEgr,       setXmlsEgr]       = useState([])
+  const [guardando,     setGuardando]     = useState(false)
+  const [filtroPeriodo, setFiltroPeriodo] = useState({ anio: new Date().getFullYear(), mes: '' })
 
   useEffect(() => { cargarCliente() }, [id])
 
@@ -59,7 +61,7 @@ export default function ClienteDetalle() {
   async function cargarDocumentos(entidad_id) {
     const params = new URLSearchParams({ entidad_id })
     if (filtroPeriodo.anio) params.append('anio', filtroPeriodo.anio)
-    if (filtroPeriodo.mes) params.append('mes', filtroPeriodo.mes)
+    if (filtroPeriodo.mes)  params.append('mes',  filtroPeriodo.mes)
     const { data } = await api.get(`/documentos?${params}`)
     setDocumentos(data)
   }
@@ -67,17 +69,21 @@ export default function ClienteDetalle() {
   async function cargarCfdis(entidad_id) {
     const params = new URLSearchParams()
     if (filtroPeriodo.anio) params.append('anio', filtroPeriodo.anio)
-    if (filtroPeriodo.mes) params.append('mes', filtroPeriodo.mes)
-    const [resumen, des, iva, isr] = await Promise.all([
+    if (filtroPeriodo.mes)  params.append('mes',  filtroPeriodo.mes)
+    const [resumen, des, iva, isr, desIva, desIsr] = await Promise.all([
       api.get(`/cfdi/resumen/${entidad_id}?${params}`),
       api.get(`/cfdi/desglose/${entidad_id}?${params}`),
       api.get(`/cfdi/resumen-iva/${entidad_id}?${params}`),
       api.get(`/cfdi/resumen-isr/${entidad_id}?${params}`),
+      api.get(`/cfdi/desglose-iva/${entidad_id}?${params}`),
+      api.get(`/cfdi/desglose-isr/${entidad_id}?${params}`),
     ])
     setCfdis(resumen.data)
     setDesglose(des.data)
     setResumenIva(iva.data)
     setResumenIsr(isr.data)
+    setDesgloseIva(desIva.data)
+    setDesgloseIsr(desIsr.data)
   }
 
   function cambiarEntidad(idx) {
@@ -93,9 +99,9 @@ export default function ClienteDetalle() {
     try {
       await api.post('/entidades', { ...formEnt, cliente_id: id })
       setModalEnt(false)
-      setFormEnt({ tipo: 'fisica', razon_social: '', rfc: '', regimen_fiscal: '' })
+      setFormEnt({ tipo:'fisica', razon_social:'', rfc:'', regimen_fiscal:'' })
       cargarCliente()
-    } catch (err) {
+    } catch(err) {
       alert(err.response?.data?.detail || 'Error al guardar')
     } finally {
       setGuardando(false)
@@ -111,20 +117,20 @@ export default function ClienteDetalle() {
       for (const archivo of archivos) {
         await api.post('/documentos', {
           entidad_id,
-          tipo_doc: formDoc.tipo_doc,
-          mes: formDoc.mes ? parseInt(formDoc.mes) : null,
-          anio: formDoc.anio ? parseInt(formDoc.anio) : null,
+          tipo_doc:       formDoc.tipo_doc,
+          mes:            formDoc.mes ? parseInt(formDoc.mes) : null,
+          anio:           formDoc.anio ? parseInt(formDoc.anio) : null,
           nombre_archivo: archivo.name,
-          storage_url: `pendiente/${archivo.name}`,
-          tamano_bytes: archivo.size,
-          notas: formDoc.notas,
+          storage_url:    `pendiente/${archivo.name}`,
+          tamano_bytes:   archivo.size,
+          notas:          formDoc.notas,
         })
       }
       setModalDoc(false)
       setArchivos([])
-      setFormDoc({ tipo_doc: 'opinion_cumplimiento', mes: '', anio: new Date().getFullYear(), notas: '' })
+      setFormDoc({ tipo_doc:'opinion_cumplimiento', mes:'', anio: new Date().getFullYear(), notas:'' })
       cargarDocumentos(entidad_id)
-    } catch (err) {
+    } catch(err) {
       alert(err.response?.data?.detail || 'Error al subir')
     } finally {
       setGuardando(false)
@@ -162,7 +168,7 @@ export default function ClienteDetalle() {
       setXmlsIng([])
       setXmlsEgr([])
       cargarCfdis(entidad_id)
-    } catch (err) {
+    } catch(err) {
       alert(err.response?.data?.detail || 'Error al procesar')
     } finally {
       setGuardando(false)
@@ -172,62 +178,58 @@ export default function ClienteDetalle() {
   function TablaDesglose({ titulo, color, filas }) {
     return (
       <div className="card">
-        <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)', fontWeight: 600, fontSize: 13, color }}>
+        <div style={{padding:'10px 16px', borderBottom:'1px solid var(--border)', fontWeight:600, fontSize:13, color}}>
           {titulo}
         </div>
         <table>
           <thead>
             <tr>
               <th>RFC / Nombre</th>
-              <th style={{ textAlign: 'right' }}>Fact.</th>
-              <th style={{ textAlign: 'right' }}>IVA</th>
-              <th style={{ textAlign: 'right' }}>Base</th>
-              <th style={{ textAlign: 'right' }}>IVA $</th>
+              <th style={{textAlign:'right'}}>Fact.</th>
+              <th style={{textAlign:'right'}}>IVA</th>
+              <th style={{textAlign:'right'}}>Base</th>
+              <th style={{textAlign:'right'}}>IVA $</th>
             </tr>
           </thead>
           <tbody>
             {filas.map((r, i) => {
               const nivel = r.nivel_revision || 'revisar_isr'
               const badgeColor =
-                nivel === 'valida' ? 'blue' :
-                  nivel === 'valida_frontera' ? 'amber' :
-                    nivel === 'revisar_isr' ? 'gray' :
-                      nivel === 'revisar_mixta' ? 'amber' :
-                        nivel === 'nomina' ? 'gray' :
-                          nivel === 'nota_credito' ? 'red' : 'gray'
-
+                nivel === 'valida'          ? 'blue'  :
+                nivel === 'valida_frontera' ? 'amber' :
+                nivel === 'revisar_isr'     ? 'gray'  :
+                nivel === 'revisar_mixta'   ? 'amber' :
+                nivel === 'nomina'          ? 'gray'  :
+                nivel === 'nota_credito'    ? 'red'   : 'gray'
               const badgeText =
-                nivel === 'valida' ? '16% ✓' :
-                  nivel === 'valida_frontera' ? '8% ✓' :
-                    nivel === 'revisar_isr' ? '0% ISR' :
-                      nivel === 'revisar_mixta' ? '⚠️ Mixta' :
-                        nivel === 'nomina' ? 'Nómina' :
-                          nivel === 'nota_credito' ? 'Nota Cred.' : '—'
-
+                nivel === 'valida'          ? '16% ✓'      :
+                nivel === 'valida_frontera' ? '8% ✓'       :
+                nivel === 'revisar_isr'     ? '0% ISR'     :
+                nivel === 'revisar_mixta'   ? '⚠️ Mixta'   :
+                nivel === 'nomina'          ? 'Nómina'     :
+                nivel === 'nota_credito'    ? 'Nota Cred.' : '—'
               return (
                 <tr key={i}>
                   <td>
-                    <div style={{ fontFamily: 'var(--mono)', fontSize: 11 }}>{r.rfc}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.nombre || '—'}</div>
+                    <div style={{fontFamily:'var(--mono)', fontSize:11}}>{r.rfc}</div>
+                    <div style={{fontSize:11, color:'var(--text-muted)'}}>{r.nombre || '—'}</div>
                   </td>
-                  <td style={{ textAlign: 'right', fontSize: 12 }}>{r.num_facturas}</td>
-                  <td style={{ textAlign: 'right' }}>
-                    <span className={`badge badge-${badgeColor}`}>
-                      {badgeText}
-                    </span>
+                  <td style={{textAlign:'right', fontSize:12}}>{r.num_facturas}</td>
+                  <td style={{textAlign:'right'}}>
+                    <span className={`badge badge-${badgeColor}`}>{badgeText}</span>
                   </td>
-                  <td style={{ textAlign: 'right', fontFamily: 'var(--mono)', fontSize: 12 }}>
-                    ${parseFloat(r.base || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+                    ${parseFloat(r.base || 0).toLocaleString('es-MX', {minimumFractionDigits:2})}
                   </td>
-                  <td style={{ textAlign: 'right', fontFamily: 'var(--mono)', fontSize: 12 }}>
-                    ${parseFloat(r.iva || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  <td style={{textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+                    ${parseFloat(r.iva || 0).toLocaleString('es-MX', {minimumFractionDigits:2})}
                   </td>
                 </tr>
               )
             })}
             {!filas.length && (
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 12, padding: 12 }}>
+                <td colSpan={5} style={{textAlign:'center', color:'var(--text-muted)', fontSize:12, padding:12}}>
                   Sin registros
                 </td>
               </tr>
@@ -238,18 +240,13 @@ export default function ClienteDetalle() {
     )
   }
 
-  // Componente ModalRevision — agregar dentro de ClienteDetalle.jsx
-  // Se activa cuando hay facturas con decision = 'pendiente'
-
   function ModalRevision({ entidad_id, onClose, onGuardado }) {
-    const [facturas, setFacturas] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [facturas,  setFacturas]  = useState([])
+    const [loading,   setLoading]   = useState(true)
     const [guardando, setGuardando] = useState(false)
-    const [cambios, setCambios] = useState({}) // uuid_sat -> decision
+    const [cambios,   setCambios]   = useState({})
 
-    useEffect(() => {
-      cargarPendientes()
-    }, [])
+    useEffect(() => { cargarPendientes() }, [])
 
     async function cargarPendientes() {
       setLoading(true)
@@ -257,7 +254,6 @@ export default function ClienteDetalle() {
         const { data } = await api.get(`/cfdi?entidad_id=${entidad_id}`)
         const pendientes = data.filter(f => f.decision === 'pendiente')
         setFacturas(pendientes)
-        // Inicializar cambios con decision actual
         const init = {}
         pendientes.forEach(f => { init[f.uuid_sat] = f.decision })
         setCambios(init)
@@ -269,13 +265,11 @@ export default function ClienteDetalle() {
     async function guardar() {
       setGuardando(true)
       try {
-        const items = Object.entries(cambios).map(([uuid_sat, decision]) => ({
-          uuid_sat, decision
-        }))
+        const items = Object.entries(cambios).map(([uuid_sat, decision]) => ({ uuid_sat, decision }))
         await api.put('/cfdi/decision', { items })
         onGuardado()
         onClose()
-      } catch (err) {
+      } catch(err) {
         alert('Error al guardar decisiones')
       } finally {
         setGuardando(false)
@@ -288,73 +282,69 @@ export default function ClienteDetalle() {
 
     const OPCIONES = [
       { value: 'incluir_iva', label: '✅ Incluir IVA', color: '#15803D' },
-      { value: 'solo_isr', label: '📋 Solo ISR', color: '#1D3A5F' },
-      { value: 'descartar', label: '🗑 Descartar', color: '#DC2626' },
+      { value: 'solo_isr',    label: '📋 Solo ISR',    color: '#1D3A5F' },
+      { value: 'descartar',   label: '🗑 Descartar',   color: '#DC2626' },
     ]
 
     return (
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-box modal-box-lg" onClick={e => e.stopPropagation()}
-          style={{ width: 680, maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+          style={{width:680, maxHeight:'80vh', display:'flex', flexDirection:'column'}}>
           <div className="modal-head">
             <span>⚠️ Facturas pendientes de revisión</span>
             <button className="modal-close" onClick={onClose}>✕</button>
           </div>
-
           {loading ? (
-            <div className="loading-center"><div className="spinner" /> Cargando...</div>
+            <div className="loading-center"><div className="spinner"/> Cargando...</div>
           ) : (
             <>
-              <div style={{ padding: '10px 20px', background: '#FAEEDA', fontSize: 12, color: '#854F0B', borderBottom: '1px solid var(--border)' }}>
-                Estas facturas tienen IVA mixto o sin IVA. Tu papá decide qué hacer con cada una.
+              <div style={{padding:'10px 20px', background:'#FAEEDA', fontSize:12, color:'#854F0B', borderBottom:'1px solid var(--border)'}}>
+                Estas facturas tienen IVA mixto o sin IVA. Decide qué hacer con cada una.
               </div>
-              <div style={{ overflowY: 'auto', flex: 1 }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div style={{overflowY:'auto', flex:1}}>
+                <table style={{width:'100%', borderCollapse:'collapse'}}>
                   <thead>
-                    <tr style={{ background: 'var(--gray-50)' }}>
-                      <th style={{ padding: '8px 16px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)' }}>RFC / Proveedor</th>
-                      <th style={{ padding: '8px 16px', textAlign: 'right', fontSize: 11, color: 'var(--text-muted)' }}>Base</th>
-                      <th style={{ padding: '8px 16px', textAlign: 'right', fontSize: 11, color: 'var(--text-muted)' }}>IVA</th>
-                      <th style={{ padding: '8px 16px', textAlign: 'center', fontSize: 11, color: 'var(--text-muted)' }}>Tipo</th>
-                      <th style={{ padding: '8px 16px', textAlign: 'center', fontSize: 11, color: 'var(--text-muted)' }}>Decisión</th>
+                    <tr style={{background:'var(--gray-50)'}}>
+                      <th style={{padding:'8px 16px', textAlign:'left', fontSize:11, color:'var(--text-muted)'}}>RFC / Proveedor</th>
+                      <th style={{padding:'8px 16px', textAlign:'right', fontSize:11, color:'var(--text-muted)'}}>Base</th>
+                      <th style={{padding:'8px 16px', textAlign:'right', fontSize:11, color:'var(--text-muted)'}}>IVA</th>
+                      <th style={{padding:'8px 16px', textAlign:'center', fontSize:11, color:'var(--text-muted)'}}>Tipo</th>
+                      <th style={{padding:'8px 16px', textAlign:'center', fontSize:11, color:'var(--text-muted)'}}>Decisión</th>
                     </tr>
                   </thead>
                   <tbody>
                     {facturas.map(f => (
-                      <tr key={f.uuid_sat} style={{ borderBottom: '1px solid var(--border)' }}>
-                        <td style={{ padding: '10px 16px' }}>
-                          <div style={{ fontFamily: 'var(--mono)', fontSize: 11 }}>{f.rfc_emisor}</div>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{f.nombre_emisor}</div>
-                          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
+                      <tr key={f.uuid_sat} style={{borderBottom:'1px solid var(--border)'}}>
+                        <td style={{padding:'10px 16px'}}>
+                          <div style={{fontFamily:'var(--mono)', fontSize:11}}>{f.rfc_emisor}</div>
+                          <div style={{fontSize:11, color:'var(--text-muted)'}}>{f.nombre_emisor}</div>
+                          <div style={{fontSize:10, color:'var(--text-muted)', marginTop:2}}>
                             {f.folio && `Folio: ${f.folio} · `}
                             {f.fecha_emision ? new Date(f.fecha_emision).toLocaleDateString('es-MX') : ''}
                           </div>
                         </td>
-                        <td style={{ padding: '10px 16px', textAlign: 'right', fontFamily: 'var(--mono)', fontSize: 12 }}>
-                          ${parseFloat(f.subtotal || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        <td style={{padding:'10px 16px', textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+                          ${parseFloat(f.subtotal || 0).toLocaleString('es-MX', {minimumFractionDigits:2})}
                         </td>
-                        <td style={{ padding: '10px 16px', textAlign: 'right', fontFamily: 'var(--mono)', fontSize: 12 }}>
-                          ${parseFloat(f.iva_trasladado || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        <td style={{padding:'10px 16px', textAlign:'right', fontFamily:'var(--mono)', fontSize:12}}>
+                          ${parseFloat(f.iva_trasladado || 0).toLocaleString('es-MX', {minimumFractionDigits:2})}
                         </td>
-                        <td style={{ padding: '10px 16px', textAlign: 'center' }}>
+                        <td style={{padding:'10px 16px', textAlign:'center'}}>
                           <span className={`badge badge-${f.nivel_revision === 'revisar_mixta' ? 'amber' : 'gray'}`}>
                             {f.nivel_revision === 'revisar_mixta' ? '⚠️ Mixta' : '0% ISR'}
                           </span>
                         </td>
-                        <td style={{ padding: '10px 16px' }}>
-                          <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                        <td style={{padding:'10px 16px'}}>
+                          <div style={{display:'flex', gap:4, justifyContent:'center'}}>
                             {OPCIONES.map(op => (
                               <button key={op.value}
                                 onClick={() => cambiarDecision(f.uuid_sat, op.value)}
                                 style={{
-                                  fontSize: 11, padding: '4px 8px', borderRadius: 6,
-                                  border: cambios[f.uuid_sat] === op.value
-                                    ? `2px solid ${op.color}`
-                                    : '1px solid var(--border)',
-                                  background: cambios[f.uuid_sat] === op.value
-                                    ? op.color : 'var(--surface)',
+                                  fontSize:11, padding:'4px 8px', borderRadius:6,
+                                  border: cambios[f.uuid_sat] === op.value ? `2px solid ${op.color}` : '1px solid var(--border)',
+                                  background: cambios[f.uuid_sat] === op.value ? op.color : 'var(--surface)',
                                   color: cambios[f.uuid_sat] === op.value ? 'white' : 'var(--text-muted)',
-                                  cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap'
+                                  cursor:'pointer', transition:'all 0.15s', whiteSpace:'nowrap'
                                 }}>
                                 {op.label}
                               </button>
@@ -365,7 +355,7 @@ export default function ClienteDetalle() {
                     ))}
                     {!facturas.length && (
                       <tr>
-                        <td colSpan={5} style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <td colSpan={5} style={{padding:32, textAlign:'center', color:'var(--text-muted)'}}>
                           Sin facturas pendientes de revisión
                         </td>
                       </tr>
@@ -373,11 +363,11 @@ export default function ClienteDetalle() {
                   </tbody>
                 </table>
               </div>
-              <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              <div style={{padding:'12px 20px', borderTop:'1px solid var(--border)', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                <div style={{fontSize:12, color:'var(--text-muted)'}}>
                   {facturas.length} factura{facturas.length !== 1 ? 's' : ''} pendiente{facturas.length !== 1 ? 's' : ''}
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{display:'flex', gap:8}}>
                   <button className="btn" onClick={onClose}>Cancelar</button>
                   <button className="btn btn-primary" onClick={guardar} disabled={guardando}>
                     {guardando ? 'Guardando...' : 'Guardar decisiones'}
@@ -391,15 +381,14 @@ export default function ClienteDetalle() {
     )
   }
 
-
-  if (loading) return <div className="loading-center"><div className="spinner" /> Cargando...</div>
-  if (!cliente) return <div style={{ padding: 24 }}>Cliente no encontrado</div>
+  if (loading) return <div className="loading-center"><div className="spinner"/> Cargando...</div>
+  if (!cliente) return <div style={{padding:24}}>Cliente no encontrado</div>
 
   const entidad = cliente.entidades?.[tabEntidad]
 
   const docsPorMes = {}
   documentos.forEach(d => {
-    const key = `${d.anio}-${String(d.mes || 0).padStart(2, '0')}`
+    const key = `${d.anio}-${String(d.mes||0).padStart(2,'0')}`
     if (!docsPorMes[key]) docsPorMes[key] = { anio: d.anio, mes: d.mes, docs: [] }
     docsPorMes[key].docs.push(d)
   })
@@ -410,10 +399,10 @@ export default function ClienteDetalle() {
 
       {/* HEADER */}
       <div className="detalle-header card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{display:'flex', alignItems:'center', gap:12}}>
           <button className="btn btn-sm" onClick={() => navigate('/clientes')}>← Volver</button>
           <div className="detalle-avatar">
-            {cliente.nombre_completo.split(' ').map(w => w[0]).slice(0, 2).join('')}
+            {cliente.nombre_completo.split(' ').map(w=>w[0]).slice(0,2).join('')}
           </div>
           <div>
             <h1 className="detalle-nombre">{cliente.nombre_completo}</h1>
@@ -422,7 +411,7 @@ export default function ClienteDetalle() {
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{display:'flex', gap:8}}>
           {cliente.portal_activo
             ? <span className="badge badge-green">Portal activo</span>
             : <span className="badge badge-gray">Sin portal</span>}
@@ -440,11 +429,11 @@ export default function ClienteDetalle() {
             >
               <span className={`badge badge-${e.tipo === 'fisica' ? 'blue' : 'gray'}`}>{e.tipo}</span>
               {e.razon_social}
-              <span className="mono" style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 4 }}>{e.rfc}</span>
+              <span className="mono" style={{fontSize:11, color:'var(--text-muted)', marginLeft:4}}>{e.rfc}</span>
             </button>
           ))}
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, paddingRight: 16 }}>
-            <span className={`badge badge-${entidad?.estatus_sat === 'al_corriente' ? 'green' : entidad?.estatus_sat === 'pendiente' ? 'amber' : 'red'}`}>
+          <div style={{marginLeft:'auto', display:'flex', alignItems:'center', gap:8, paddingRight:16}}>
+            <span className={`badge badge-${entidad?.estatus_sat==='al_corriente'?'green':entidad?.estatus_sat==='pendiente'?'amber':'red'}`}>
               SAT: {entidad?.estatus_sat || 'no verificado'}
             </span>
           </div>
@@ -452,9 +441,9 @@ export default function ClienteDetalle() {
       )}
 
       {!cliente.entidades?.length && (
-        <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>
+        <div className="card" style={{padding:24, textAlign:'center', color:'var(--text-muted)'}}>
           Sin entidades registradas.
-          <button className="btn btn-primary" style={{ marginLeft: 12 }} onClick={() => setModalEnt(true)}>
+          <button className="btn btn-primary" style={{marginLeft:12}} onClick={() => setModalEnt(true)}>
             + Agregar entidad
           </button>
         </div>
@@ -462,26 +451,26 @@ export default function ClienteDetalle() {
 
       {entidad && (
         <>
-          {/* FILTRO + TABS CONTENIDO */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* FILTRO + TABS */}
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
             <div className="content-tabs">
-              {['archivero', 'iva', 'isr', 'info'].map(t => (
-                <button key={t} className={`content-tab${tab === t ? ' active' : ''}`} onClick={() => setTab(t)}>
-                  {t === 'archivero' ? '🗂 Archivero' :
-                    t === 'iva' ? '💰 IVA' :
-                      t === 'isr' ? '📋 ISR' : '📋 Info fiscal'}
+              {['archivero','iva','isr','info'].map(t => (
+                <button key={t} className={`content-tab${tab===t?' active':''}`} onClick={() => setTab(t)}>
+                  {t==='archivero' ? '🗂 Archivero' :
+                   t==='iva'       ? '💰 IVA' :
+                   t==='isr'       ? '📋 ISR' : '📋 Info fiscal'}
                 </button>
               ))}
             </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <select className="input" style={{ width: 80 }} value={filtroPeriodo.mes}
-                onChange={e => setFiltroPeriodo(p => ({ ...p, mes: e.target.value }))}>
+            <div style={{display:'flex', gap:8, alignItems:'center'}}>
+              <select className="input" style={{width:80}} value={filtroPeriodo.mes}
+                onChange={e => setFiltroPeriodo(p => ({...p, mes: e.target.value}))}>
                 <option value="">Todos</option>
-                {MESES.slice(1).map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
+                {MESES.slice(1).map((m,i) => <option key={i+1} value={i+1}>{m}</option>)}
               </select>
-              <select className="input" style={{ width: 90 }} value={filtroPeriodo.anio}
-                onChange={e => setFiltroPeriodo(p => ({ ...p, anio: e.target.value }))}>
-                {[2024, 2025, 2026].map(a => <option key={a} value={a}>{a}</option>)}
+              <select className="input" style={{width:90}} value={filtroPeriodo.anio}
+                onChange={e => setFiltroPeriodo(p => ({...p, anio: e.target.value}))}>
+                {[2024,2025,2026].map(a => <option key={a} value={a}>{a}</option>)}
               </select>
               <button className="btn btn-sm" onClick={() => { cargarDocumentos(entidad.id); cargarCfdis(entidad.id) }}>
                 Filtrar
@@ -492,11 +481,11 @@ export default function ClienteDetalle() {
           {/* ARCHIVERO */}
           {tab === 'archivero' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+              <div style={{display:'flex', justifyContent:'flex-end', marginBottom:12}}>
                 <button className="btn btn-primary" onClick={() => setModalDoc(true)}>+ Registrar documento</button>
               </div>
               {mesesOrdenados.length === 0 && (
-                <div className="card" style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)' }}>
+                <div className="card" style={{padding:32, textAlign:'center', color:'var(--text-muted)'}}>
                   Sin documentos registrados para este periodo
                 </div>
               )}
@@ -506,7 +495,7 @@ export default function ClienteDetalle() {
                   <div key={key} className="card mes-grupo">
                     <div className="mes-header">
                       <span className="mes-label">{grupo.mes ? MESES[grupo.mes] : 'Sin mes'} {grupo.anio || ''}</span>
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{grupo.docs.length} documento{grupo.docs.length !== 1 ? 's' : ''}</span>
+                      <span style={{fontSize:11, color:'var(--text-muted)'}}>{grupo.docs.length} documento{grupo.docs.length!==1?'s':''}</span>
                     </div>
                     <div className="docs-lista">
                       {grupo.docs.map(d => (
@@ -515,11 +504,11 @@ export default function ClienteDetalle() {
                           <div className="doc-info">
                             <div className="doc-nombre">{d.nombre_archivo}</div>
                             <div className="doc-meta">
-                              {TIPOS_DOC.find(t => t.value === d.tipo_doc)?.label || d.tipo_doc}
+                              {TIPOS_DOC.find(t => t.value===d.tipo_doc)?.label || d.tipo_doc}
                               {d.subido_por_nombre && ` · ${d.subido_por_nombre}`}
                             </div>
                           </div>
-                          <span className={`badge badge-${d.estatus === 'subido' ? 'blue' : 'green'}`}>{d.estatus}</span>
+                          <span className={`badge badge-${d.estatus==='subido'?'blue':'green'}`}>{d.estatus}</span>
                         </div>
                       ))}
                     </div>
@@ -531,9 +520,9 @@ export default function ClienteDetalle() {
 
           {/* IVA */}
           {tab === 'iva' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                <button className="btn" style={{ borderColor: 'var(--amber)', color: 'var(--amber)' }}
+            <div style={{display:'flex', flexDirection:'column', gap:16}}>
+              <div style={{display:'flex', justifyContent:'flex-end', gap:8}}>
+                <button className="btn" style={{borderColor:'var(--amber)', color:'var(--amber)'}}
                   onClick={() => setModalRevision(true)}>
                   ⚠️ Revisar pendientes
                 </button>
@@ -543,27 +532,27 @@ export default function ClienteDetalle() {
                 <div className="cfdi-resumen">
                   <div className="card cfdi-card">
                     <div className="cfdi-label">IVA trasladado (ingresos)</div>
-                    <div className="cfdi-valor cfdi-ing">${resumenIva.ingresos.iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
-                    <div className="cfdi-sub">{resumenIva.ingresos.cantidad} CFDIs · Base ${resumenIva.ingresos.base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                    <div className="cfdi-valor cfdi-ing">${resumenIva.ingresos.iva.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+                    <div className="cfdi-sub">{resumenIva.ingresos.cantidad} CFDIs · Base ${resumenIva.ingresos.base.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
                   </div>
                   <div className="card cfdi-card">
                     <div className="cfdi-label">IVA acreditable (egresos)</div>
-                    <div className="cfdi-valor cfdi-egr">${resumenIva.egresos.iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
-                    <div className="cfdi-sub">{resumenIva.egresos.cantidad} CFDIs · Base ${resumenIva.egresos.base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                    <div className="cfdi-valor cfdi-egr">${resumenIva.egresos.iva.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+                    <div className="cfdi-sub">{resumenIva.egresos.cantidad} CFDIs · Base ${resumenIva.egresos.base.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
                   </div>
                   <div className={`card cfdi-card ${resumenIva.iva_a_pagar >= 0 ? 'cfdi-util-pos' : 'cfdi-util-neg'}`}>
                     <div className="cfdi-label">IVA a pagar / a favor</div>
                     <div className={`cfdi-valor ${resumenIva.iva_a_pagar >= 0 ? 'cfdi-ing' : 'cfdi-egr'}`}>
-                      {resumenIva.iva_a_pagar >= 0 ? '+' : ''}${resumenIva.iva_a_pagar.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                      {resumenIva.iva_a_pagar >= 0 ? '+' : ''}${resumenIva.iva_a_pagar.toLocaleString('es-MX',{minimumFractionDigits:2})}
                     </div>
                     <div className="cfdi-sub">{resumenIva.iva_a_pagar >= 0 ? 'IVA a pagar al SAT' : 'IVA a favor'}</div>
                   </div>
                 </div>
               )}
-              {desglose && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                  <TablaDesglose titulo="📥 Ingresos por cliente" color="#15803D" filas={desglose.ingresos} />
-                  <TablaDesglose titulo="📤 Egresos por proveedor" color="var(--red)" filas={desglose.egresos} />
+              {desgloseIva && (
+                <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:14}}>
+                  <TablaDesglose titulo="📥 Ingresos por cliente"  color="#15803D" filas={desgloseIva.ingresos} />
+                  <TablaDesglose titulo="📤 Egresos por proveedor" color="var(--red)" filas={desgloseIva.egresos} />
                 </div>
               )}
             </div>
@@ -571,32 +560,32 @@ export default function ClienteDetalle() {
 
           {/* ISR */}
           {tab === 'isr' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{display:'flex', flexDirection:'column', gap:16}}>
               {resumenIsr && (
                 <div className="cfdi-resumen">
                   <div className="card cfdi-card">
                     <div className="cfdi-label">Ingresos base ISR</div>
-                    <div className="cfdi-valor cfdi-ing">${resumenIsr.ingresos.base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                    <div className="cfdi-valor cfdi-ing">${resumenIsr.ingresos.base.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
                     <div className="cfdi-sub">{resumenIsr.ingresos.cantidad} CFDIs acumulados</div>
                   </div>
                   <div className="card cfdi-card">
                     <div className="cfdi-label">Egresos base ISR</div>
-                    <div className="cfdi-valor cfdi-egr">${resumenIsr.egresos.base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                    <div className="cfdi-valor cfdi-egr">${resumenIsr.egresos.base.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
                     <div className="cfdi-sub">{resumenIsr.egresos.cantidad} CFDIs deducibles</div>
                   </div>
                   <div className={`card cfdi-card ${resumenIsr.utilidad_base >= 0 ? 'cfdi-util-pos' : 'cfdi-util-neg'}`}>
                     <div className="cfdi-label">Utilidad / Pérdida base ISR</div>
                     <div className={`cfdi-valor ${resumenIsr.utilidad_base >= 0 ? 'cfdi-ing' : 'cfdi-egr'}`}>
-                      {resumenIsr.utilidad_base >= 0 ? '+' : ''}${resumenIsr.utilidad_base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                      {resumenIsr.utilidad_base >= 0 ? '+' : ''}${resumenIsr.utilidad_base.toLocaleString('es-MX',{minimumFractionDigits:2})}
                     </div>
                     <div className="cfdi-sub">Base para cálculo ISR</div>
                   </div>
                 </div>
               )}
-              {desglose && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                  <TablaDesglose titulo="📥 Ingresos ISR" color="#15803D" filas={desglose.ingresos} />
-                  <TablaDesglose titulo="📤 Egresos ISR" color="var(--red)" filas={desglose.egresos} />
+              {desgloseIsr && (
+                <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:14}}>
+                  <TablaDesglose titulo="📥 Ingresos ISR"  color="#15803D" filas={desgloseIsr.ingresos} />
+                  <TablaDesglose titulo="📤 Egresos ISR"   color="var(--red)" filas={desgloseIsr.egresos} />
                 </div>
               )}
             </div>
@@ -604,27 +593,27 @@ export default function ClienteDetalle() {
 
           {/* INFO FISCAL */}
           {tab === 'info' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <div className="card" style={{ padding: 16 }}>
-                <div style={{ fontWeight: 600, marginBottom: 12 }}>Datos fiscales</div>
+            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:16}}>
+              <div className="card" style={{padding:16}}>
+                <div style={{fontWeight:600, marginBottom:12}}>Datos fiscales</div>
                 <div className="info-rows">
                   <div className="info-row"><span>RFC</span><span className="mono">{entidad.rfc}</span></div>
-                  <div className="info-row"><span>Tipo</span><span className={`badge badge-${entidad.tipo === 'fisica' ? 'blue' : 'gray'}`}>{entidad.tipo}</span></div>
-                  <div className="info-row"><span>Régimen</span><span className="mono">{entidad.regimen_fiscal || '—'}</span></div>
+                  <div className="info-row"><span>Tipo</span><span className={`badge badge-${entidad.tipo==='fisica'?'blue':'gray'}`}>{entidad.tipo}</span></div>
+                  <div className="info-row"><span>Régimen</span><span className="mono">{entidad.regimen_fiscal||'—'}</span></div>
                   <div className="info-row">
                     <span>Estatus SAT</span>
-                    <span className={`badge badge-${entidad.estatus_sat === 'al_corriente' ? 'green' : entidad.estatus_sat === 'pendiente' ? 'amber' : 'red'}`}>
+                    <span className={`badge badge-${entidad.estatus_sat==='al_corriente'?'green':entidad.estatus_sat==='pendiente'?'amber':'red'}`}>
                       {entidad.estatus_sat}
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="card" style={{ padding: 16 }}>
-                <div style={{ fontWeight: 600, marginBottom: 12 }}>Obligaciones fiscales</div>
+              <div className="card" style={{padding:16}}>
+                <div style={{fontWeight:600, marginBottom:12}}>Obligaciones fiscales</div>
                 {entidad.calendario?.map(c => (
-                  <div key={c.id} className="info-row" style={{ padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
-                    <span style={{ fontSize: 12 }}>{c.descripcion || c.obligacion}</span>
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Día {c.dia_limite}</span>
+                  <div key={c.id} className="info-row" style={{padding:'6px 0', borderBottom:'1px solid var(--border)'}}>
+                    <span style={{fontSize:12}}>{c.descripcion||c.obligacion}</span>
+                    <span style={{fontSize:12, color:'var(--text-muted)'}}>Día {c.dia_limite}</span>
                   </div>
                 ))}
               </div>
@@ -644,7 +633,7 @@ export default function ClienteDetalle() {
             <form onSubmit={guardarEntidad} className="modal-body">
               <div className="field">
                 <label>Tipo *</label>
-                <select className="input" value={formEnt.tipo} onChange={e => setFormEnt({ ...formEnt, tipo: e.target.value })}>
+                <select className="input" value={formEnt.tipo} onChange={e => setFormEnt({...formEnt, tipo:e.target.value})}>
                   <option value="fisica">Persona física</option>
                   <option value="moral">Persona moral</option>
                 </select>
@@ -652,19 +641,19 @@ export default function ClienteDetalle() {
               <div className="field">
                 <label>Razón social *</label>
                 <input className="input" required placeholder="Ej. Sistemas en Grabación SA de CV"
-                  value={formEnt.razon_social} onChange={e => setFormEnt({ ...formEnt, razon_social: e.target.value })} />
+                  value={formEnt.razon_social} onChange={e => setFormEnt({...formEnt, razon_social:e.target.value})}/>
               </div>
               <div className="field">
                 <label>RFC *</label>
                 <input className="input" required placeholder="Ej. SEGR950101ABC"
-                  value={formEnt.rfc} onChange={e => setFormEnt({ ...formEnt, rfc: e.target.value.toUpperCase() })} />
+                  value={formEnt.rfc} onChange={e => setFormEnt({...formEnt, rfc:e.target.value.toUpperCase()})}/>
               </div>
               <div className="field">
                 <label>Régimen fiscal</label>
                 <input className="input" placeholder="Ej. 612, 601..."
-                  value={formEnt.regimen_fiscal} onChange={e => setFormEnt({ ...formEnt, regimen_fiscal: e.target.value })} />
+                  value={formEnt.regimen_fiscal} onChange={e => setFormEnt({...formEnt, regimen_fiscal:e.target.value})}/>
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <div style={{display:'flex', gap:8, justifyContent:'flex-end'}}>
                 <button type="button" className="btn" onClick={() => setModalEnt(false)}>Cancelar</button>
                 <button type="submit" className="btn btn-primary" disabled={guardando}>
                   {guardando ? 'Guardando...' : 'Guardar entidad'}
@@ -686,39 +675,39 @@ export default function ClienteDetalle() {
             <form onSubmit={subirDocumento} className="modal-body">
               <div className="field">
                 <label>Tipo de documento *</label>
-                <select className="input" value={formDoc.tipo_doc} onChange={e => setFormDoc({ ...formDoc, tipo_doc: e.target.value })}>
+                <select className="input" value={formDoc.tipo_doc} onChange={e => setFormDoc({...formDoc, tipo_doc:e.target.value})}>
                   {TIPOS_DOC.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
                 <div className="field">
                   <label>Mes</label>
-                  <select className="input" value={formDoc.mes} onChange={e => setFormDoc({ ...formDoc, mes: e.target.value })}>
+                  <select className="input" value={formDoc.mes} onChange={e => setFormDoc({...formDoc, mes:e.target.value})}>
                     <option value="">Sin mes</option>
-                    {MESES.slice(1).map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
+                    {MESES.slice(1).map((m,i) => <option key={i+1} value={i+1}>{m}</option>)}
                   </select>
                 </div>
                 <div className="field">
                   <label>Año</label>
                   <input className="input" type="number" value={formDoc.anio}
-                    onChange={e => setFormDoc({ ...formDoc, anio: e.target.value })} />
+                    onChange={e => setFormDoc({...formDoc, anio:e.target.value})}/>
                 </div>
               </div>
               <div className="field">
                 <label>Archivo(s) *</label>
-                <input type="file" multiple onChange={e => setArchivos(Array.from(e.target.files))} style={{ fontSize: 13 }} />
+                <input type="file" multiple onChange={e => setArchivos(Array.from(e.target.files))} style={{fontSize:13}}/>
                 {archivos.length > 0 && (
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                    {archivos.length} archivo{archivos.length !== 1 ? 's' : ''} seleccionado{archivos.length !== 1 ? 's' : ''}
+                  <div style={{fontSize:11, color:'var(--text-muted)', marginTop:4}}>
+                    {archivos.length} archivo{archivos.length!==1?'s':''} seleccionado{archivos.length!==1?'s':''}
                   </div>
                 )}
               </div>
               <div className="field">
                 <label>Notas</label>
                 <input className="input" placeholder="Opcional..." value={formDoc.notas}
-                  onChange={e => setFormDoc({ ...formDoc, notas: e.target.value })} />
+                  onChange={e => setFormDoc({...formDoc, notas:e.target.value})}/>
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <div style={{display:'flex', gap:8, justifyContent:'flex-end'}}>
                 <button type="button" className="btn" onClick={() => setModalDoc(false)}>Cancelar</button>
                 <button type="submit" className="btn btn-primary" disabled={guardando}>
                   {guardando ? 'Registrando...' : 'Registrar'}
@@ -741,18 +730,18 @@ export default function ClienteDetalle() {
               <div className="cfdi-upload-grid">
                 <div className="cfdi-upload-zone">
                   <div className="cfdi-upload-label ing">📥 XMLs de INGRESOS</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Facturas emitidas por el cliente</div>
-                  <input type="file" multiple accept=".xml" onChange={e => setXmlsIng(Array.from(e.target.files))} />
-                  {xmlsIng.length > 0 && <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 6 }}>✓ {xmlsIng.length} archivo{xmlsIng.length !== 1 ? 's' : ''} listos</div>}
+                  <div style={{fontSize:11, color:'var(--text-muted)', marginBottom:8}}>Facturas emitidas por el cliente</div>
+                  <input type="file" multiple accept=".xml" onChange={e => setXmlsIng(Array.from(e.target.files))}/>
+                  {xmlsIng.length > 0 && <div style={{fontSize:11, color:'var(--accent)', marginTop:6}}>✓ {xmlsIng.length} archivo{xmlsIng.length!==1?'s':''} listos</div>}
                 </div>
                 <div className="cfdi-upload-zone">
                   <div className="cfdi-upload-label egr">📤 XMLs de EGRESOS</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Facturas recibidas por el cliente</div>
-                  <input type="file" multiple accept=".xml" onChange={e => setXmlsEgr(Array.from(e.target.files))} />
-                  {xmlsEgr.length > 0 && <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 6 }}>✓ {xmlsEgr.length} archivo{xmlsEgr.length !== 1 ? 's' : ''} listos</div>}
+                  <div style={{fontSize:11, color:'var(--text-muted)', marginBottom:8}}>Facturas recibidas por el cliente</div>
+                  <input type="file" multiple accept=".xml" onChange={e => setXmlsEgr(Array.from(e.target.files))}/>
+                  {xmlsEgr.length > 0 && <div style={{fontSize:11, color:'var(--accent)', marginTop:6}}>✓ {xmlsEgr.length} archivo{xmlsEgr.length!==1?'s':''} listos</div>}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+              <div style={{display:'flex', gap:8, justifyContent:'flex-end', marginTop:8}}>
                 <button type="button" className="btn" onClick={() => setModalCfdi(false)}>Cancelar</button>
                 <button type="submit" className="btn btn-primary" disabled={guardando}>
                   {guardando ? 'Procesando...' : 'Procesar XMLs'}
@@ -762,6 +751,8 @@ export default function ClienteDetalle() {
           </div>
         </div>
       )}
+
+      {/* MODAL REVISION */}
       {modalRevision && entidad && (
         <ModalRevision
           entidad_id={entidad.id}
@@ -769,6 +760,7 @@ export default function ClienteDetalle() {
           onGuardado={() => cargarCfdis(entidad.id)}
         />
       )}
+
     </div>
   )
 }
