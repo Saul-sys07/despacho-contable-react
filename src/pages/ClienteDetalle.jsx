@@ -526,7 +526,6 @@ export default function ClienteDetalle() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <button className="btn btn-primary" onClick={() => setModalCfdi(true)}>+ Cargar XMLs del SAT</button>
-                <button className="btn btn-primary" onClick={() => setModalCfdi(true)}>+ Cargar XMLs del SAT</button>
                 <button className="btn" style={{ borderColor: 'var(--amber)', color: 'var(--amber)' }}
                   onClick={() => setModalRevision(true)}>
                   ⚠️ Revisar pendientes
