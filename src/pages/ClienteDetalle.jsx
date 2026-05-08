@@ -26,6 +26,8 @@ export default function ClienteDetalle() {
   const [documentos, setDocumentos] = useState([])
   const [cfdis, setCfdis] = useState(null)
   const [desglose, setDesglose] = useState(null)
+  const [resumenIva, setResumenIva] = useState(null)
+  const [resumenIsr, setResumenIsr] = useState(null)
   const [modalDoc, setModalDoc] = useState(false)
   const [modalEnt, setModalEnt] = useState(false)
   const [modalCfdi, setModalCfdi] = useState(false)
@@ -66,12 +68,16 @@ export default function ClienteDetalle() {
     const params = new URLSearchParams()
     if (filtroPeriodo.anio) params.append('anio', filtroPeriodo.anio)
     if (filtroPeriodo.mes) params.append('mes', filtroPeriodo.mes)
-    const [resumen, des] = await Promise.all([
+    const [resumen, des, iva, isr] = await Promise.all([
       api.get(`/cfdi/resumen/${entidad_id}?${params}`),
       api.get(`/cfdi/desglose/${entidad_id}?${params}`),
+      api.get(`/cfdi/resumen-iva/${entidad_id}?${params}`),
+      api.get(`/cfdi/resumen-isr/${entidad_id}?${params}`),
     ])
     setCfdis(resumen.data)
     setDesglose(des.data)
+    setResumenIva(iva.data)
+    setResumenIsr(isr.data)
   }
 
   function cambiarEntidad(idx) {
@@ -459,9 +465,11 @@ export default function ClienteDetalle() {
           {/* FILTRO + TABS CONTENIDO */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div className="content-tabs">
-              {['archivero', 'cfdi', 'info'].map(t => (
+              {['archivero', 'iva', 'isr', 'info'].map(t => (
                 <button key={t} className={`content-tab${tab === t ? ' active' : ''}`} onClick={() => setTab(t)}>
-                  {t === 'archivero' ? '🗂 Archivero' : t === 'cfdi' ? '📊 CFDIs / Utilidad' : '📋 Info fiscal'}
+                  {t === 'archivero' ? '🗂 Archivero' :
+                    t === 'iva' ? '💰 IVA' :
+                      t === 'isr' ? '📋 ISR' : '📋 Info fiscal'}
                 </button>
               ))}
             </div>
@@ -521,34 +529,34 @@ export default function ClienteDetalle() {
             </div>
           )}
 
-          {/* CFDIs */}
-          {tab === 'cfdi' && (
+          {/* IVA */}
+          {tab === 'iva' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button className="btn btn-primary" onClick={() => setModalCfdi(true)}>+ Cargar XMLs del SAT</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                 <button className="btn" style={{ borderColor: 'var(--amber)', color: 'var(--amber)' }}
                   onClick={() => setModalRevision(true)}>
                   ⚠️ Revisar pendientes
                 </button>
+                <button className="btn btn-primary" onClick={() => setModalCfdi(true)}>+ Cargar XMLs del SAT</button>
               </div>
-              {cfdis && (
+              {resumenIva && (
                 <div className="cfdi-resumen">
                   <div className="card cfdi-card">
-                    <div className="cfdi-label">Ingresos base (sin IVA)</div>
-                    <div className="cfdi-valor cfdi-ing">${cfdis.ingresos.base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
-                    <div className="cfdi-sub">{cfdis.ingresos.cantidad} CFDIs · IVA ${cfdis.ingresos.iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                    <div className="cfdi-label">IVA trasladado (ingresos)</div>
+                    <div className="cfdi-valor cfdi-ing">${resumenIva.ingresos.iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                    <div className="cfdi-sub">{resumenIva.ingresos.cantidad} CFDIs · Base ${resumenIva.ingresos.base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
                   </div>
                   <div className="card cfdi-card">
-                    <div className="cfdi-label">Egresos base (sin IVA)</div>
-                    <div className="cfdi-valor cfdi-egr">${cfdis.egresos.base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
-                    <div className="cfdi-sub">{cfdis.egresos.cantidad} CFDIs · IVA ${cfdis.egresos.iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                    <div className="cfdi-label">IVA acreditable (egresos)</div>
+                    <div className="cfdi-valor cfdi-egr">${resumenIva.egresos.iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                    <div className="cfdi-sub">{resumenIva.egresos.cantidad} CFDIs · Base ${resumenIva.egresos.base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
                   </div>
-                  <div className={`card cfdi-card ${cfdis.utilidad_base >= 0 ? 'cfdi-util-pos' : 'cfdi-util-neg'}`}>
-                    <div className="cfdi-label">Utilidad / Pérdida base</div>
-                    <div className={`cfdi-valor ${cfdis.utilidad_base >= 0 ? 'cfdi-ing' : 'cfdi-egr'}`}>
-                      {cfdis.utilidad_base >= 0 ? '+' : ''}${cfdis.utilidad_base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  <div className={`card cfdi-card ${resumenIva.iva_a_pagar >= 0 ? 'cfdi-util-pos' : 'cfdi-util-neg'}`}>
+                    <div className="cfdi-label">IVA a pagar / a favor</div>
+                    <div className={`cfdi-valor ${resumenIva.iva_a_pagar >= 0 ? 'cfdi-ing' : 'cfdi-egr'}`}>
+                      {resumenIva.iva_a_pagar >= 0 ? '+' : ''}${resumenIva.iva_a_pagar.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                     </div>
-                    <div className="cfdi-sub">Base para cálculo ISR</div>
+                    <div className="cfdi-sub">{resumenIva.iva_a_pagar >= 0 ? 'IVA a pagar al SAT' : 'IVA a favor'}</div>
                   </div>
                 </div>
               )}
@@ -556,6 +564,39 @@ export default function ClienteDetalle() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                   <TablaDesglose titulo="📥 Ingresos por cliente" color="#15803D" filas={desglose.ingresos} />
                   <TablaDesglose titulo="📤 Egresos por proveedor" color="var(--red)" filas={desglose.egresos} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ISR */}
+          {tab === 'isr' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {resumenIsr && (
+                <div className="cfdi-resumen">
+                  <div className="card cfdi-card">
+                    <div className="cfdi-label">Ingresos base ISR</div>
+                    <div className="cfdi-valor cfdi-ing">${resumenIsr.ingresos.base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                    <div className="cfdi-sub">{resumenIsr.ingresos.cantidad} CFDIs acumulados</div>
+                  </div>
+                  <div className="card cfdi-card">
+                    <div className="cfdi-label">Egresos base ISR</div>
+                    <div className="cfdi-valor cfdi-egr">${resumenIsr.egresos.base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                    <div className="cfdi-sub">{resumenIsr.egresos.cantidad} CFDIs deducibles</div>
+                  </div>
+                  <div className={`card cfdi-card ${resumenIsr.utilidad_base >= 0 ? 'cfdi-util-pos' : 'cfdi-util-neg'}`}>
+                    <div className="cfdi-label">Utilidad / Pérdida base ISR</div>
+                    <div className={`cfdi-valor ${resumenIsr.utilidad_base >= 0 ? 'cfdi-ing' : 'cfdi-egr'}`}>
+                      {resumenIsr.utilidad_base >= 0 ? '+' : ''}${resumenIsr.utilidad_base.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="cfdi-sub">Base para cálculo ISR</div>
+                  </div>
+                </div>
+              )}
+              {desglose && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <TablaDesglose titulo="📥 Ingresos ISR" color="#15803D" filas={desglose.ingresos} />
+                  <TablaDesglose titulo="📤 Egresos ISR" color="var(--red)" filas={desglose.egresos} />
                 </div>
               )}
             </div>
@@ -722,12 +763,12 @@ export default function ClienteDetalle() {
         </div>
       )}
       {modalRevision && entidad && (
-  <ModalRevision
-    entidad_id={entidad.id}
-    onClose={() => setModalRevision(false)}
-    onGuardado={() => cargarCfdis(entidad.id)}
-  />
-)}
+        <ModalRevision
+          entidad_id={entidad.id}
+          onClose={() => setModalRevision(false)}
+          onGuardado={() => cargarCfdis(entidad.id)}
+        />
+      )}
     </div>
   )
 }
